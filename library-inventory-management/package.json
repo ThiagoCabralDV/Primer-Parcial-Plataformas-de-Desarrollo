@@ -1,0 +1,14 @@
+{
+  "name": "library-inventory-management",
+  "version": "1.0.0",
+  "description": "A simple library inventory management system.",
+  "main": "src/index.html",
+  "scripts": {
+    "start": "live-server src"
+  },
+  "dependencies": {
+    "bootstrap": "^5.3.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
