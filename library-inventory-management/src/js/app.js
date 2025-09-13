@@ -6,6 +6,9 @@ let editIndex = null;
 // Seleccionar elementos del DOM
 const bookForm = document.getElementById('bookForm');
 const bookTableBody = document.querySelector('#bookTable tbody');
+const bookTitleInput = document.getElementById('bookTitle');
+const bookDescriptionInput = document.getElementById('bookDescription');
+const bookImageInput = document.getElementById('bookImage');
 
 // Cargar libros desde Local Storage
 document.addEventListener('DOMContentLoaded', renderBooks);
@@ -14,37 +17,52 @@ document.addEventListener('DOMContentLoaded', renderBooks);
 bookForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    const bookTitle = document.getElementById('bookTitle').value;
-    const bookImageInput = document.getElementById('bookImage');
+    const bookTitle = bookTitleInput.value;
+    const bookDescription = bookDescriptionInput.value;
     const file = bookImageInput.files[0];
 
-    const reader = new FileReader();
-    reader.onload = function (event) {
-        const bookImage = event.target.result; // Imagen convertida a Base64
-
-        if (editIndex !== null) {
-            // Editar libro existente
-            const books = getBooksFromLocalStorage();
-            // Si se selecciona una nueva imagen, actualizarla
-            if (file) {
-                books[editIndex] = { title: bookTitle, image: bookImage };
-            } else {
-                // Si no se selecciona nueva imagen, mantener la anterior
-                books[editIndex].title = bookTitle;
-            }
+    if (editIndex !== null) {
+        // Editar libro existente
+        const books = getBooksFromLocalStorage();
+        // Si se selecciona una nueva imagen, actualizarla
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const bookImage = event.target.result;
+                books[editIndex] = {
+                    title: bookTitle,
+                    description: bookDescription,
+                    image: bookImage
+                };
+                localStorage.setItem('books', JSON.stringify(books));
+                renderBooks();
+                resetForm();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            books[editIndex].title = bookTitle;
+            books[editIndex].description = bookDescription;
             localStorage.setItem('books', JSON.stringify(books));
             renderBooks();
             resetForm();
-        } else {
-            // Agregar nuevo libro
-            const book = { title: bookTitle, image: bookImage };
+        }
+    } else {
+        // Agregar nuevo libro
+        if (!file) return; // Se requiere imagen
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            const bookImage = event.target.result;
+            const book = {
+                title: bookTitle,
+                description: bookDescription,
+                image: bookImage
+            };
             addBookToLocalStorage(book);
             addBookToTable(book);
-
             bookForm.reset();
-        }
-    };
-    reader.readAsDataURL(file); // Convertir archivo a Base64
+        };
+        reader.readAsDataURL(file);
+    }
 });
 
 // Agregar libro a la tabla
@@ -53,6 +71,7 @@ function addBookToTable(book) {
     row.innerHTML = `
         <td><img src="${book.image}" alt="${book.title}" class="img-thumbnail" style="width: 100px;"></td>
         <td>${book.title}</td>
+        <td>${book.description}</td>
         <td>
             <button class="btn btn-warning btn-sm edit-btn">Editar</button>
             <button class="btn btn-danger btn-sm delete">Eliminar</button>
@@ -69,8 +88,9 @@ function addBookToTable(book) {
     // Manejar la edición del libro
     row.querySelector('.edit-btn').addEventListener('click', () => {
         const books = getBooksFromLocalStorage();
-        const bookToEdit = books.find(b => b.title === book.title);
-        document.getElementById('bookTitle').value = bookToEdit.title;
+        const bookToEdit = books.find(b => b.title === book.title && b.description === book.description);
+        bookTitleInput.value = bookToEdit.title;
+        bookDescriptionInput.value = bookToEdit.description;
         editIndex = books.indexOf(bookToEdit);
         document.querySelector('button[type="submit"]').textContent = 'Guardar Cambios';
     });
@@ -104,7 +124,7 @@ function removeBookFromLocalStorage(title) {
 
 // Función para resetear el formulario
 function resetForm() {
-    document.querySelector('#bookForm').reset();
+    bookForm.reset();
     document.querySelector('button[type="submit"]').textContent = 'Add Book';
     editIndex = null;
 }
