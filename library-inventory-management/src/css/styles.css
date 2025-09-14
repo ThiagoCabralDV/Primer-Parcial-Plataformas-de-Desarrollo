@@ -53,3 +53,9 @@ h1, h2 {
     width: 100%;
     display: block;
 }
+
+.table td:nth-child(3) {
+    white-space: pre-line;
+    word-break: break-word;
+    max-width: 300px;
+}
