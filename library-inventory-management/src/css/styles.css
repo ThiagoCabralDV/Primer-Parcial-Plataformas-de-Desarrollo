@@ -41,3 +41,15 @@ h1 {
 h1, h2 {
     color: #343a40;
 }
+
+.titulo-fondo {
+    background: #b6e7c9;
+    color: #155724;
+    padding: 24px 0;
+    margin-bottom: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    font-weight: bold;
+    width: 100%;
+    display: block;
+}
